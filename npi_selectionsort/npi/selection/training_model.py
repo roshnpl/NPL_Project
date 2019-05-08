@@ -2,21 +2,21 @@
 import os
 import pickle
 
-from npi.bubble.config import FIELD_ROW, FIELD_WIDTH, FIELD_DEPTH
-from npi.bubble.lib import BubblesortEnv, BubblesortProgramSet, BubblesortTeacher, create_char_map, create_questions, run_npi
-from npi.bubble.model import BubblesortNPIModel
+from npi.selection.config import FIELD_ROW, FIELD_WIDTH, FIELD_DEPTH
+from npi.selection.lib import SelectionsortEnv, SelectionsortProgramSet, SelectionsortTeacher, create_char_map, create_questions, run_npi
+from npi.selection.model import SelectionsortNPIModel
 from npi.core import ResultLogger, RuntimeSystem
 from npi.terminal_core import TerminalNPIRunner, Terminal
 
 
 def main(filename: str, model_path: str):
     system = RuntimeSystem()
-    program_set = BubblesortProgramSet()
+    program_set = SelectionsortProgramSet()
 
     with open(filename, 'rb') as f:
         steps_list = pickle.load(f)
 
-    npi_model = BubblesortNPIModel(system, model_path, program_set)
+    npi_model = SelectionsortNPIModel(system, model_path, program_set)
     npi_model.fit(steps_list)
 
 
