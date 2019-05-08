@@ -12,6 +12,8 @@ Tensorflow
 scikit-learn
 numpy
 
+Npi.py contains the code for NPI core
+
 Authors(List by name)
 
 Bharat Matai - Bucket sort
@@ -24,5 +26,7 @@ Roshni - Multipication
 multiplication.py file is used which will perform the multipication between two numbers in the range of 1 to 1000 and trying to establish it with the left pointer
 
 Khyati - Selection sort
+
+Performed Selection sort by training the NPI model on a dataset with arrays sorted from 0 to 1000.
 *Readme file inside folder
 
