@@ -1,6 +1,8 @@
 """
 npi.py
-Core model definition script for the Neural Programmer-Interpreter.
+Core model definition script for the Neural Programmer-Interpreter.This core we have established and are 
+working on it to solve the three given conditions core is getting established but not the multipication problem and sorting problems are not getting addressed.
+
 """
 import tensorflow as tf
 import tflearn
