@@ -5,11 +5,6 @@ import numpy as np
 
 from npi.core import Program, IntegerArguments, NPIStep, StepOutput, StepInput, StepInOut
 
-__raw_author__ = 'k_morishita'
-__author__ = 'Xingye Xu'
-"""
-modified update_main_window_str with judgement about y
-"""
 
 
 class Screen:
@@ -105,7 +100,7 @@ class Terminal:
 
     @staticmethod
     def ignore_error_add_str(win, y, x, s, attr=curses.A_NORMAL):
-        """一番右下に書き込むと例外が飛んでくるけど、漢は黙って無視するのがお作法らしい？"""
+
         try:
             win.addstr(y, x, s, attr)
         except curses.error:
