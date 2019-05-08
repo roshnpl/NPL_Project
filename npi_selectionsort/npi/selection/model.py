@@ -6,7 +6,7 @@ from copy import copy
 
 import math
 import numpy as np
-from keras.engine.topology import Merge, InputLayer
+from keras.engine.topology import InputLayer
 from keras.engine.training import Model
 from keras.layers.core import Dense, Activation, RepeatVector, MaxoutDense
 from keras.layers.embeddings import Embedding
@@ -16,20 +16,18 @@ from keras.optimizers import Adam
 from keras.regularizers import l1, l2
 from keras.utils.visualize_util import plot
 
-from npi.bubble.config import FIELD_ROW, FIELD_DEPTH, PROGRAM_VEC_SIZE, PROGRAM_KEY_VEC_SIZE, FIELD_WIDTH
-from npi.bubble.lib import BubblesortProgramSet, BubblesortEnv, run_npi, create_questions, BubblesortTeacher
+from npi.selection.config import FIELD_ROW, FIELD_DEPTH, PROGRAM_VEC_SIZE, PROGRAM_KEY_VEC_SIZE, FIELD_WIDTH
+from npi.selection.lib import SelectionsortProgramSet, SelectionsortEnv, run_npi, create_questions, SelectionsortTeacher
 from npi.core import NPIStep, Program, IntegerArguments, StepOutput, RuntimeSystem, PG_RETURN, StepInOut, StepInput, \
     to_one_hot_array
 from npi.terminal_core import TerminalNPIRunner
 
-__author__ = 'Junling Chen & Xingye Xu'
 
-
-class BubblesortNPIModel(NPIStep):
+class SelectionsortNPIModel(NPIStep):
     model = None
     f_enc = None
 
-    def __init__(self, system: RuntimeSystem, model_path: str=None, program_set: BubblesortProgramSet=None):
+    def __init__(self, system: RuntimeSystem, model_path: str=None, program_set: SelectionsortProgramSet=None):
         self.system = system                #
         self.model_path = model_path        #
         self.program_set = program_set      #
@@ -94,7 +92,7 @@ class BubblesortNPIModel(NPIStep):
 
 
     def reset(self):
-        super(BubblesortNPIModel, self).reset()
+        super(SelectionsortNPIModel, self).reset()
         for l in self.model.layers:
             if type(l) is LSTM:
                 l.reset_states()
@@ -107,7 +105,6 @@ class BubblesortNPIModel(NPIStep):
 
     def fit(self, steps_list, epoch=3000):
         """
-
         :param int epoch:
         :param typing.List[typing.Dict[q=dict, steps=typing.List[StepInOut]]] steps_list:
         :return:
@@ -181,18 +178,18 @@ class BubblesortNPIModel(NPIStep):
         return True
 
     def test_to_subset(self, questions):
-        bubblesort_env = BubblesortEnv(FIELD_ROW, FIELD_WIDTH, FIELD_DEPTH)
-        teacher = BubblesortTeacher(self.program_set)
+        selectionsort_env = SelectionsortEnv(FIELD_ROW, FIELD_WIDTH, FIELD_DEPTH)
+        teacher = SelectionsortTeacher(self.program_set)
         npi_runner = TerminalNPIRunner(None, self)
         teacher_runner = TerminalNPIRunner(None, teacher)
         correct_count = wrong_count = 0
         wrong_steps_list = []
         for idx, question in enumerate(questions):
             question = copy(question)
-            if self.question_test(bubblesort_env, npi_runner, question):
+            if self.question_test(selectionsort_env, npi_runner, question):
                 correct_count += 1
             else:
-                self.question_test(bubblesort_env, teacher_runner, question)
+                self.question_test(selectionsort_env, teacher_runner, question)
                 wrong_steps_list.append({"q": question, "steps": teacher_runner.step_list})
                 wrong_count += 1
         return correct_count, wrong_count, wrong_steps_list
@@ -202,7 +199,7 @@ class BubblesortNPIModel(NPIStep):
         return str(tuple([(k, d[k]) for k in sorted(d)]))
 
     def do_learn(self, steps_list, epoch, pass_rate=1.0, skip_correct=False):
-        bubblesort_env = BubblesortEnv(FIELD_ROW, FIELD_WIDTH, FIELD_DEPTH)
+        selectionsort_env = SelectionsortEnv(FIELD_ROW, FIELD_WIDTH, FIELD_DEPTH)
         npi_runner = TerminalNPIRunner(None, self)
         last_weights = None
         correct_count = Counter()
@@ -216,7 +213,7 @@ class BubblesortNPIModel(NPIStep):
             for idx, steps_dict in enumerate(steps_list):
                 question = copy(steps_dict['q'])
                 question_key = self.dict_to_str(question)
-                if self.question_test(bubblesort_env, npi_runner, question):
+                if self.question_test(selectionsort_env, npi_runner, question):
                     if correct_count[question_key] == 0:
                         correct_new += 1
                     correct_count[question_key] += 1
@@ -328,11 +325,11 @@ class BubblesortNPIModel(NPIStep):
             if np.average(losses) < 1e-06:
                 break
 
-    def question_test(self, bubblesort_env, npi_runner, question):
-        bubblesort_env.reset()
+    def question_test(self, selectionsort_env, npi_runner, question):
+        selectionsort_env.reset()
         self.reset()
         try:
-            run_npi(bubblesort_env, npi_runner, self.program_set.BUBBLESORT, question)
+            run_npi(selectionsort_env, npi_runner, self.program_set.SELECTIONSORT, question)
             if question['correct']:
                 return True
         except StopIteration:
@@ -391,4 +388,4 @@ class BubblesortNPIModel(NPIStep):
 
     @staticmethod
     def size_of_env_observation():
-        return 6 * FIELD_ROW * FIELD_DEPTH      # pointers has three
+return 6 * FIELD_ROW * FIELD_DEPTH # pointers has three
