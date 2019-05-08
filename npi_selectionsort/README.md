@@ -1,7 +1,7 @@
 NPI Selection sort
 
 
-Nerual program interpreters of bubblesort
+Nerual program interpreters of selectionsort
 
 
 This project is based on these main resources:
