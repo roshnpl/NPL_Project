@@ -19,30 +19,29 @@ class IntegerArguments:
     max_arg_num = MAX_ARG_NUM
     size_of_arguments = depth * max_arg_num
 
-    def __init__(self, args: list=None, values: np.ndarray=None):       #将value填充成一个3*10的二维数组，是3个0~9的数组合而成,
-        if values is not None:                                          #最后一个是原子操作的序号，前两个是原子操作的参数，因为数量小可以采用编码
+    def __init__(self, args: list=None, values: np.ndarray=None):       
+        if values is not None:                                          
             self.values = values.reshape((self.max_arg_num, self.depth))
         else:
             self.values = np.zeros((self.max_arg_num, self.depth), dtype=np.float32)
 
         if args:
-            for i, v in enumerate(args):                #如果args是数组形式，则i应该是数组中数据的下表，v是数组中的数据
-                self.update_to(i, v)                    #args最多是一个3个数组成的表，update会依据args的值修改value的值
-
+            for i, v in enumerate(args):               
+                self.update_to(i, v)                    
     def copy(self):
         obj = IntegerArguments()
         obj.values = np.copy(self.values)
         return obj
 
-    def decode_all(self):                           #为整个value解码成int
+    def decode_all(self):                           
         return [self.decode_at(i) for i in range(len(self.values))]
 
-    def decode_at(self, index: int) -> int:         #为value中的一个值解码成int
+    def decode_at(self, index: int) -> int:         
         return self.values[index].argmax()
 
     def update_to(self, index: int, integer: int):
         self.values[index] = 0
-        self.values[index, int(np.clip(integer, 0, self.depth-1))] = 1      #clip减除函数，超过范围的数都被置为范围边界
+        self.values[index, int(np.clip(integer, 0, self.depth-1))] = 1      
 
     def __str__(self):
         return "<IA: %s>" % self.decode_all()
