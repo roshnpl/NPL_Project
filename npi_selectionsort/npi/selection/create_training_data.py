@@ -4,8 +4,8 @@ import curses
 import pickle
 from copy import copy
 
-from npi.bubble.config import FIELD_ROW, FIELD_WIDTH, FIELD_DEPTH
-from npi.bubble.lib import BubblesortEnv, BubblesortProgramSet, BubblesortTeacher, create_char_map, create_questions, run_npi
+from npi.selection.config import FIELD_ROW, FIELD_WIDTH, FIELD_DEPTH
+from npi.selection.lib import SelectionsortEnv, SelectionsortProgramSet, SelectionsortTeacher, create_char_map, create_questions, run_npi
 from npi.core import ResultLogger
 from npi.terminal_core import TerminalNPIRunner, Terminal
 
@@ -13,19 +13,19 @@ from npi.terminal_core import TerminalNPIRunner, Terminal
 def main(stdscr, filename: str, num: int, result_logger: ResultLogger):
     terminal = Terminal(stdscr, create_char_map())
     terminal.init_window(FIELD_WIDTH, FIELD_ROW)
-    program_set = BubblesortProgramSet()
-    bubblesort_env = BubblesortEnv(FIELD_ROW, FIELD_WIDTH, FIELD_DEPTH)
+    program_set = SelectionsortProgramSet()
+    selectionsort_env = SelectionsortEnv(FIELD_ROW, FIELD_WIDTH, FIELD_DEPTH)
 
     questions = create_questions(number=num)
-    teacher = BubblesortTeacher(program_set)
+    teacher = SelectionsortTeacher(program_set)
     npi_runner = TerminalNPIRunner(terminal, teacher)
     npi_runner.verbose = DEBUG_MODE
     steps_list = []
     f = open("debug_log.csv", "w")
     for data in questions:
-        bubblesort_env.reset()
+        selectionsort_env.reset()
         q = copy(data)
-        run_npi(bubblesort_env, npi_runner, program_set.BUBBLESORT, data)
+        run_npi(selectionsort_env, npi_runner, program_set.SELECTIONSORT, data)
         steps_list.append({"q": q, "steps": npi_runner.step_list})
         for step in npi_runner.step_list:
             f.write("{},".format(step.input.env[0]))
