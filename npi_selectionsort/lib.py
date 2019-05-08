@@ -6,12 +6,9 @@ import numpy as np
 from npi.core import Program, IntegerArguments, StepOutput, NPIStep, PG_CONTINUE, PG_RETURN, NULL
 from npi.terminal_core import Screen, Terminal
 
-__author__ = 'Junling Chen & Xingye Xu'
-
-
-class BubblesortEnv:
+class SelectionsortEnv:
     """
-    Environment of Bubblesort
+    Environment of Selectionsort
     """
     def __init__(self, height, width, num_chars):
         self.screen = Screen(height, width)         
@@ -71,7 +68,7 @@ class MovePtrProgram(Program):
     TO_LEFT = 0
     TO_RIGHT = 1
 
-    def do(self, env: BubblesortEnv, args: IntegerArguments):
+    def do(self, env: SelectionsortEnv, args: IntegerArguments):
         row = args.decode_at(0)
         left_or_right = args.decode_at(1)
         env.move_pointer(row, left_or_right)
@@ -80,16 +77,16 @@ class MovePtrProgram(Program):
 class SwapProgram(Program):         
     output_to_env = True
 
-    def do(self, env: BubblesortEnv, args: IntegerArguments):
+    def do(self, env: SelectionsortEnv, args: IntegerArguments):
         env.swap_point()
 
 
-class BubblesortProgramSet:
+class SelectionsortProgramSet:
     NOP = Program('NOP')
     MOVE_PTR = MovePtrProgram('MOVE_PTR', 3, 2)     
     SWAP = SwapProgram('SWAP')  
-    BUBBLESORT = Program('BUBBLESORT')
-    BUBBLE = Program('BUBBLE')
+    SELECTIONSORT = Program('SELECTIONSORT')
+    SELECTION = Program('SELECTION')
     RESET = Program('RESET')
     BSTEP = Program('BSTEP')
     COMPSWAP = Program('COMPSWAP')
@@ -103,8 +100,8 @@ class BubblesortProgramSet:
         self.register(self.NOP)
         self.register(self.MOVE_PTR)
         self.register(self.SWAP)
-        self.register(self.BUBBLESORT)
-        self.register(self.BUBBLE)
+        self.register(self.SELECTIONSORT)
+        self.register(self.SELECTION)
         self.register(self.RESET)
         self.register(self.BSTEP)
         self.register(self.COMPSWAP)
@@ -120,16 +117,16 @@ class BubblesortProgramSet:
         return self.map.get(i)
 
 
-class BubblesortTeacher(NPIStep):
-    def __init__(self, program_set: BubblesortProgramSet):
+class SelectionsortTeacher(NPIStep):
+    def __init__(self, program_set: SelectionsortProgramSet):
         self.pg_set = program_set
         self.step_queue = None
         self.step_queue_stack = []
         self.sub_program = {}
         self.register_subprogram(program_set.MOVE_PTR  , self.pg_primitive)
         self.register_subprogram(program_set.SWAP      , self.pg_primitive)
-        self.register_subprogram(program_set.BUBBLESORT, self.pg_bubblesort)
-        self.register_subprogram(program_set.BUBBLE    , self.pg_bubble)
+        self.register_subprogram(program_set.SELECTIONSORT, self.pg_selectionsort)
+        self.register_subprogram(program_set.SELECTION   , self.pg_selection)
         self.register_subprogram(program_set.RESET     , self.pg_reset)
         self.register_subprogram(program_set.BSTEP     , self.pg_bstep)
         self.register_subprogram(program_set.COMPSWAP  , self.pg_compswap)
@@ -137,7 +134,7 @@ class BubblesortTeacher(NPIStep):
         self.register_subprogram(program_set.RSHIFT    , self.pg_rshift)
 
     def reset(self):
-        super(BubblesortTeacher, self).reset()
+        super(SelectionsortTeacher, self).reset()
         self.step_queue_stack = []
         self.step_queue = None
 
@@ -177,16 +174,16 @@ class BubblesortTeacher(NPIStep):
         return None
 
 
-    def pg_bubblesort(self, env_observation: np.ndarray, arguments: IntegerArguments):
+    def pg_selectionsort(self, env_observation: np.ndarray, arguments: IntegerArguments):
         ret = []
         (pointer1, pointer2, pointer3, pointer1_pos, pointer2_pos, pointer3_pos), (a1, a2, a3) = self.decode_params(env_observation, arguments)
         if pointer3 == NULL:
             return None
-        ret.append((self.pg_set.BUBBLE, None))
+        ret.append((self.pg_set.SELECTION, None))
         ret.append((self.pg_set.RESET, None))
         return ret
 
-    def pg_bubble(self, env_observation: np.array, arguments: IntegerArguments):
+    def pg_selection(self, env_observation: np.array, arguments: IntegerArguments):
         ret = []
         p = self.pg_set
         (pointer1, pointer2, pointer3, pointer1_pos, pointer2_pos, pointer3_pos), (a1, a2, a3) = self.decode_params(env_observation, arguments)
@@ -297,14 +294,14 @@ def create_questions(start = 0, stop = 9, number = 1000, maxlength = 9):
     return questions
 
 
-def run_npi(bubblesort_env, npi_runner, program, data):
+def run_npi(selectionsort_env, npi_runner, program, data):
     data['expect'] = sorted(data['raw'])
 
-    bubblesort_env.setup_problem(data['raw'])
+    selectionsort_env.setup_problem(data['raw'])
 
     npi_runner.reset()
-    npi_runner.display_env(bubblesort_env, force=True)
-    npi_runner.npi_program_interface(bubblesort_env, program, IntegerArguments())
+    npi_runner.display_env(selectionsort_env, force=True)
+    npi_runner.npi_program_interface(selectionsort_env, program, IntegerArguments())
 
-    data['result'] = bubblesort_env.get_output()
+    data['result'] = selectionsort_env.get_output()
     data['correct'] = data['result'] == data['expect']
